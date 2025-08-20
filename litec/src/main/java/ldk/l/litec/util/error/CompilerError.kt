@@ -1,10 +1,11 @@
 package ldk.l.litec.util.error
 
+import ldk.l.litec.util.CharStream
 import ldk.l.litec.util.Position
 
 sealed class CompilerError(
     open val position: Position,
-    open val source: String,
+    open val source: CharStream,
     open val errorType: ErrorType,
     open val filePath: String? = null,
     open val templateArgs: Array<out Any>,
@@ -14,7 +15,7 @@ sealed class CompilerError(
     // 词法错误：添加templateArgs、note、help的支持
     data class LexerError(
         override val position: Position,
-        override val source: String,
+        override val source: CharStream,
         override val errorType: ErrorType,
         override val filePath: String? = null,
         override val templateArgs: Array<out Any> = emptyArray(),
@@ -63,7 +64,7 @@ sealed class CompilerError(
     // 语法错误：在原有基础上添加templateArgs、note、help
     data class ParserError(
         override val position: Position,
-        override val source: String,
+        override val source: CharStream,
         override val errorType: ErrorType,
         override val filePath: String? = null,
         val expected: String,

@@ -1,6 +1,8 @@
 package ldk.l.litec
 
 import ldk.l.litec.parser.Lexer
+import ldk.l.litec.util.CharStream
+import ldk.l.litec.util.Logger
 import ldk.l.litec.util.Stdin
 import ldk.l.litec.util.Stdout
 
@@ -19,15 +21,19 @@ object LiteCompiler {
      */
     fun startRepl() {
         // 初始化输入输出工具
-        Stdout.initialize()
-        printWelcomeMessage()
+        init()
 
-        // 启动交互循环
-        val replLoop = generateSequence { readInput() }
-        replLoop.takeWhile { processInput(it) }.count()
+        try {
+            printWelcomeMessage()
 
-        // 退出时清理资源
-        shutdown()
+            // 启动交互循环
+            val replLoop = generateSequence { readInput() }
+            replLoop.takeWhile { processInput(it) }.count()
+
+        } finally {
+            // 退出时清理资源
+            shutdown()
+        }
     }
 
     /**
@@ -45,7 +51,7 @@ object LiteCompiler {
     /**
      * 读取用户输入
      */
-    private fun readInput(): String? {
+    private fun readInput(): CharStream? {
         try {
             Stdout.print(PROMPT)
             Stdout.flush()
@@ -60,31 +66,37 @@ object LiteCompiler {
      * 处理用户输入（核心逻辑）
      * @return 是否继续循环（false表示退出）
      */
-    private fun processInput(input: String?): Boolean {
-        if (input.isNullOrEmpty()) return true
+    private fun processInput(input: CharStream?): Boolean {
+        if (input == null) return true
 
         // 处理退出命令
-        if (input in EXIT_COMMANDS) {
+        if (EXIT_COMMANDS.contains(input.toString())) {
             Stdout.println("感谢使用 LiteC，再见！")
             return false
         }
 
         // 处理帮助命令
-        if (input == ":help") {
+        if (input == CharStream(":help")) {
             printHelp()
             return true
         }
 
         // 处理语法分析命令（显示Token）
-        if (input == ":tokens") {
+        if (input == CharStream( ":tokens")) {
             Stdout.println("请输入需要分析的表达式:")
             val expr = readInput() ?: return true
             analyzeTokens(expr)
             return true
         }
 
+        if (input == CharStream(":log")) {
+            Logger.printAllLogsAsSingleOutput()
+            return true
+        }
+
         // 默认处理：执行完整编译流程（词法分析 -> 语法分析 -> 解释执行）
         compileAndExecute(input)
+
         return true
     }
 
@@ -96,18 +108,14 @@ object LiteCompiler {
         Stdout.println("  <表达式>       - 执行表达式并输出结果")
         Stdout.println("  :tokens        - 显示表达式的词法分析结果（Token列表）")
         Stdout.println("  :help          - 显示帮助信息")
+        Stdout.println("  :log          - 打印日志信息")
         Stdout.println("  ${EXIT_COMMANDS.joinToString("/")} - 退出解释器")
     }
 
     /**
      * 分析表达式的Token
      */
-    private fun analyzeTokens(expr: String) {
-        if (expr.isBlank()) {
-            Stdout.printlnErr("错误: 表达式不能为空")
-            return
-        }
-
+    private fun analyzeTokens(expr: CharStream) {
         try {
             Lexer.resetErrors()
             val tokens = Lexer.tokenize(expr, "<REPL>")
@@ -127,10 +135,8 @@ object LiteCompiler {
     /**
      * 执行完整编译流程（当前仅包含词法分析，可扩展）
      */
-    private fun compileAndExecute(input: String) {
+    private fun compileAndExecute(input: CharStream) {
         try {
-            // 1. 词法分析
-            Lexer.resetErrors()
             val tokens = Lexer.tokenize(input, "<REPL>")
 
             if (Lexer.hadError()) {
@@ -149,10 +155,15 @@ object LiteCompiler {
         }
     }
 
+    private fun init() {
+        Logger.init()
+    }
+
     /**
      * 关闭资源
      */
     private fun shutdown() {
-        Stdin.close()
+        Logger.close()
+        // Stdin.close()
     }
 }
