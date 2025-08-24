@@ -48,9 +48,9 @@ object Stdout {
                 System.console()?.reader()?.javaClass?.name?.contains("ConsoleReader") == true
     }
 
-    fun println(s: String) = realOut.println(s)
-    fun print(s: String) = realOut.print(s)
-    fun printlnErr(s: String) = realErr.println(s)
+    fun println(s: Any?) = realOut.println(s)
+    fun print(s: Any?) = realOut.print(s)
+    fun printlnErr(s: Any?) = realErr.println(s)
     fun flush() {
         realOut.flush()
         realErr.flush()

@@ -1,6 +1,7 @@
 package ldk.l.litec
 
-import ldk.l.litec.parser.Lexer
+import ldk.l.litec.parser.LiteLexer
+import ldk.l.litec.parser.LiteParser
 import ldk.l.litec.util.CharStream
 import ldk.l.litec.util.Logger
 import ldk.l.litec.util.Stdin
@@ -55,7 +56,7 @@ object LiteCompiler {
         try {
             Stdout.print(PROMPT)
             Stdout.flush()
-            return Stdin.readLine()?.trim()
+            return Stdin.readLine()
         } catch (e: Exception) {
             Stdout.printlnErr("输入错误: ${e.message ?: "未知错误"}")
             return null
@@ -115,17 +116,20 @@ object LiteCompiler {
     /**
      * 分析表达式的Token
      */
-    private fun analyzeTokens(expr: CharStream) {
+    private fun analyzeTokens(input: CharStream) {
         try {
-            Lexer.resetErrors()
-            val tokens = Lexer.tokenize(expr, "<REPL>")
+            val lexer = LiteLexer(
+                input,
+                "<REPL>"
+            )
+            val tokens = lexer.tokenize(input, "<REPL>")
 
-            if (Lexer.hadError()) {
+            if (lexer.hasError()) {
                 Stdout.printlnErr("词法分析错误:")
-                Lexer.printErrors()
+                lexer.printErrors()
             } else {
                 Stdout.println("词法分析成功，共 ${tokens.size} 个Token:")
-                Lexer.printTokens(tokens)
+                lexer.printTokens()
             }
         } catch (e: Exception) {
             Stdout.printlnErr("分析Token时出错: ${e.message}")
@@ -137,20 +141,28 @@ object LiteCompiler {
      */
     private fun compileAndExecute(input: CharStream) {
         try {
-            val tokens = Lexer.tokenize(input, "<REPL>")
+            val parser = LiteParser(
+                LiteLexer(
+                    input,
+                    "<REPL>"
+                ),
+                filePath = "<REPL>"
+            )
 
-            if (Lexer.hadError()) {
-                Lexer.printErrors()
-                return
+            val expr = parser.parseExpr()
+
+            if (parser.hasError()) {
+                parser.printErrors()
             }
 
-            // 2. 语法分析（此处可扩展添加语法分析逻辑）
+            Stdout.println(expr)
             Stdout.println("语法分析成功")
 
             // 3. 解释执行（此处可扩展添加执行逻辑）
             Stdout.println("并未实现运行抱歉")
 
         } catch (e: Exception) {
+            e.printStackTrace()
             Stdout.printlnErr("编译执行错误: ${e.message ?: e.toString()}")
         }
     }

@@ -62,6 +62,30 @@ enum class ErrorType(
         "未结束的注释",
         "多行注释缺少闭合标记 '*/'，从第 %d 行开始"
     ),
+    MISSING_EXPONENT_DIGITS(
+        "科学计数法缺少指数数字",
+        "科学计数法 'e' 或 'E' 后必须跟至少一个数字（例如：1e10, 1.5e-3），但未找到"
+    ),
+    INVALID_HEXADECIMAL(
+        "无效的十六进制数",
+        "十六进制数格式错误：'%s'，应为 0x 后跟数字（0-9）和字母（a-f, A-F）"
+    ),
+    INVALID_BINARY(
+        "无效的二进制数",
+        "二进制数格式错误：'%s'，应为 0b 后跟 0 或 1"
+    ),
+    INVALID_OCTAL(
+        "无效的八进制数",
+        "八进制数格式错误：'%s'，应为 0o 后跟 0-7"
+    ),
+    UNTERMINATED_CHAR_LITERAL(
+        "未结束的字符字面量",
+        "字符缺少闭合单引号，从第 %d 行开始"
+    ),
+    INVALID_NUMBER_SUFFIX(
+        "不支持的数字后缀",
+        "数字后缀 '%s' 不被支持（如 L, f 等），本语言不支持类型后缀"
+    ),
 
     // ===================== 语法错误（Syntactic Errors）=====================
     UNEXPECTED_TOKEN(
@@ -78,7 +102,7 @@ enum class ErrorType(
     ),
     MISSING_PARENTHESIS(
         "缺少括号",
-        "缺少闭合括号 '%s'（对应第 %d 行的 '%s'）"
+        "缺少闭合括号"
     ),
     INVALID_STATEMENT_STRUCTURE(
         "语句结构无效",
@@ -107,6 +131,38 @@ enum class ErrorType(
     MISSING_COMMA_IN_PARAMS(
         "参数列表缺少逗号",
         "函数参数 '%s' 后缺少逗号分隔（第 %d 行）"
+    ),
+    MISSING_FUNCTION_NAME(
+        "函数缺少名称",
+        "函数声明缺少函数名（第 %d 行），应为 'func name(...)'"
+    ),
+    MISSING_VAR_NAME(
+        "变量声明缺少名称",
+        "变量声明缺少变量名（第 %d 行），应为 'var name = value'"
+    ),
+    MISSING_ASSIGNMENT_VALUE(
+        "变量声明缺少赋值",
+        "变量 '%s' 声明后缺少初始化值（第 %d 行）"
+    ),
+    EMPTY_EXPRESSION(
+        "空表达式",
+        "表达式不能为空（第 %d 行），请检查是否多写了操作符或括号"
+    ),
+    MISSING_COLON_IN_TYPE_ANNOTATION(
+        "类型标注缺少冒号",
+        "变量或参数 '%s' 缺少类型标注冒号 ':'（第 %d 行）"
+    ),
+    INVALID_TYPE_ANNOTATION(
+        "无效的类型标注",
+        "类型 '%s' 不是合法的类型名称（第 %d 行）"
+    ),
+    UNEXPECTED_EOF(
+        "意外的文件结束",
+        "源文件在第 %d 行意外结束，可能缺少闭合符号（如 }、)、]）"
+    ),
+    MISSING_ARROW_IN_LAMBDA(
+        "Lambda缺少箭头",
+        "Lambda表达式缺少 '->' 箭头（第 %d 行）"
     ),
 
     // ===================== 语义错误（Semantic Errors）=====================
@@ -157,6 +213,38 @@ enum class ErrorType(
     MISSING_RETURN_IN_FUNCTION(
         "函数缺少return语句",
         "有返回值的函数 '%s' 必须包含return语句（第 %d 行）"
+    ),
+    CANNOT_REASSIGN_CONST(
+        "常量不可重新赋值",
+        "常量 '%s' 已初始化，不能再次赋值（第 %d 行）"
+    ),
+    INCOMPATIBLE_TYPES_IN_ASSIGNMENT(
+        "赋值类型不兼容",
+        "不能将 '%s' 类型的值赋给 '%s' 类型的变量（第 %d 行）"
+    ),
+    FUNCTION_ALREADY_DEFINED(
+        "函数已重复定义",
+        "函数 '%s' 已在当前作用域定义（第 %d 行），不支持重载"
+    ),
+    RETURN_OUTSIDE_FUNCTION(
+        "return 语句在函数外",
+        "return 语句只能出现在函数体内（第 %d 行）"
+    ),
+    BREAK_OUTSIDE_LOOP(
+        "break 语句在循环外",
+        "break 语句只能出现在 for 或 while 循环中（第 %d 行）"
+    ),
+    CONTINUE_OUTSIDE_LOOP(
+        "continue 语句在循环外",
+        "continue 语句只能出现在 for 或 while 循环中（第 %d 行）"
+    ),
+    UNREACHABLE_CODE(
+        "不可达代码",
+        "此代码永远不会被执行（第 %d 行），因为前面有无条件 return 或 throw"
+    ),
+    CANNOT_RESOLVE_TYPE(
+        "无法解析类型",
+        "类型 '%s' 未定义或不在作用域中（第 %d 行）"
     ),
 
     // ===================== 运行时错误（Runtime Errors）=====================
